@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghost Finder</title>
+    <script src="https://kit.fontawesome.com/a7345faaaf.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jersey+15&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-image: url(https://images.unsplash.com/photo-1618123069754-cd64c230a169?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D);
+            background-repeat: no-repeat;
+            background-size: cover;
+            color: #4AF626;
+            font-family: "Jersey 15", sans-serif;
+            font-weight: 400;
+            font-style: normal;
+            font-size: larger;
+
+            padding: 20px;
+        }
+
+        /* TITLE */
+        .title-container {
+            border: 2px solid #4AF626;
+        }
+
+        .title-container h1 {
+            width: 100%;
+            text-align: center;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* FILTERS */
+        .sidebar-container {
+            padding: 10px;
+            width: calc(25% - 20px);
+            border: 2px solid #4AF626;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-container h2 {
+            margin-bottom: 10px;
+        }
+
+        #filters {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .property-label {
+            border-bottom: 1px solid #4AF626;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #characteristic-select {
+            width: 100%;
+            background-color: transparent;
+            color: #4AF626;
+            border: 1px solid #4AF626;
+        }
+
+        #characteristic-select option {
+            color: #4AF626;
+            background-color: #000;
+        }
+        
+        .save-container {
+            display: flex;
+            justify-content:  space-between;
+            align-items: center;
+        }
+        .save-container h2 {
+            margin: 0;
+        }
+
+        .save-container:hover {
+            cursor: pointer;
+        }
+
+        /* GHOSTS */
+        .ghost-container {
+            padding: 10px;
+            width: calc(80% - 20px);
+        }
+
+        .ghost-container h2 {
+            margin-bottom: 10px;
+        }
+
+        #filtered-ghosts {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: repeat(3, auto);
+        }
+
+        .ghost-card-container {
+            border: 2px dotted #ccc;
+            border-radius: 10px;
+            padding: 5px;
+        }
+
+        .ghost-card-title {
+            width: 100%;
+            text-align: center;
+        }
+
+        .ghost-card-evidence-list {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div class="title-container">
+            <h1>Ghost Finder 1.0</h1>
+        </div>
+
+        <br>
+
+        <div class="main-container">
+            <div class="sidebar-container">
+                <div class="filter-container">
+                    <h2>> Filtros</h2>
+                    <div id="filters"></div>
+
+                    <hr style="border: 1px solid #4AF626; margin: 15px -5px;">
+                    <h2>> Características</h2>
+                    <select id="characteristic-select">
+                        <option value="gordo">Gordo</option>
+                        <option value="calvo">Calvo</option>
+                        <option value="homo">Homofóbico</option>
+                        <option value="racista">Racista</option>
+                        <option value="feminista">Feminista</option>
+                        <option value="alfa">Macho Alfa</option>
+                        <option value="gay">Gay</option>
+                        <option value="pansexual">Pansexual</option>
+                        <option value="bolsonarista">Bolsonarista</option>
+                        <option value="comunista">Comunista</option>
+                        <option value="egirl">Egirl</option>
+                        <option value="agiota">Agiota</option>
+                        <option value="lolzeiro">Lolzeiro</option>
+                        <option value="baiano">Baiano</option>
+                        <option value="vegano">Vegano</option>
+                    </select>
+                </div>
+                <div class="save-container" onclick="savePDF(); return false;">
+                    <h2>> Salvar PDF</h2>
+                    <div class="save-btn"><i class="fa-solid fa-floppy-disk"></i></div>
+                </div>
+            </div>
+            <div class="ghost-container">
+                <h2>Fantasmas Filtrados</h2>
+
+                <div id="filtered-ghosts"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        ghosts = [
+            { name: 'Banshee', Emf5: false, GhostOrb: true, SpiritBox: false, Temperature: false, Ultraviolet: true, GhostWriting: false, DOTS: true },
+            { name: 'Demon', Emf5: false, GhostOrb: false, SpiritBox: false, Temperature: true, Ultraviolet: true, GhostWriting: true, DOTS: false },
+            { name: 'Deogen', Emf5: false, GhostOrb: false, SpiritBox: true, Temperature: false, Ultraviolet: false, GhostWriting: true, DOTS: true },
+            { name: 'Goryo', Emf5: true, GhostOrb: false, SpiritBox: false, Temperature: false, Ultraviolet: true, GhostWriting: false, DOTS: true },
+            { name: 'Hantu', Emf5: false, GhostOrb: true, SpiritBox: false, Temperatura: true, Ultraviolet: true, GhostWriting: false, DOTS: false },
+            { name: 'Jinn', Emf5: true, GhostOrb: false, SpiritBox: false, Temperature: true, Ultraviolet: true, GhostWriting: false, DOTS: false },
+            { name: 'Mare', Emf5: false, GhostOrb: true, SpiritBox: true, Temperature: false, Ultraviolet: false, GhostWriting: true, DOTS: false },
+            { name: 'Moroi', Emf5: false, GhostOrb: false, SpiritBox: true, Temperature: true, Ultraviolet: false, GhostWriting: true, DOTS: false },
+            { name: 'Myling', Emf5: true, GhostOrb: false, SpiritBox: false, Temperature: false, Ultraviolet: true, GhostWriting: true, DOTS: false },
+            { name: 'Obake', Emf5: true, GhostOrb: true, SpiritBox: false, Temperature: false, Ultraviolet: true, GhostWriting: false, DOTS: false },
+            { name: 'Oni', Emf5: true, GhostOrb: false, SpiritBox: false, Temperature: true, Ultraviolet: false, GhostWriting: false, DOTS: true },
+            { name: 'Onryo', Emf5: false, GhostOrb: true, SpiritBox: true, Temperature: true, Ultraviolet: false, GhostWriting: false, DOTS: false },
+            { name: 'Phantom', Emf5: false, GhostOrb: false, SpiritBox: true, Temperature: false, Ultraviolet: true, GhostWriting: false, DOTS: true },
+            { name: 'Poltergeist', Emf5: false, GhostOrb: false, SpiritBox: true, Temperature: false, Ultraviolet: true, GhostWriting: true, DOTS: false },
+            { name: 'Raiju', Emf5: true, GhostOrb: true, SpiritBox: false, Temperature: false, Ultraviolet: false, GhostWriting: false, DOTS: true },
+            { name: 'Revenant', Emf5: false, GhostOrb: true, SpiritBox: false, Temperature: true, Ultraviolet: false, GhostWriting: true, DOTS: false },
+            { name: 'Shade', Emf5: true, GhostOrb: false, SpiritBox: false, Temperature: true, Ultraviolet: false, GhostWriting: true, DOTS: false },
+            { name: 'Spirit', Emf5: true, GhostOrb: false, SpiritBox: true, Temperature: false, Ultraviolet: false, GhostWriting: true, DOTS: false },
+            { name: 'Thaye', Emf5: false, GhostOrb: true, SpiritBox: false, Temperature: false, Ultraviolet: false, GhostWriting: true, DOTS: true },
+            { name: 'The Twins', Emf5: true, GhostOrb: false, SpiritBox: true, Temperature: true, Ultraviolet: false, GhostWriting: false, DOTS: false },
+            { name: 'Wraith', Emf5: true, GhostOrb: false, SpiritBox: true, Temperature: false, Ultraviolet: false, GhostWriting: false, DOTS: true },
+            { name: 'Yokai', Emf5: false, GhostOrb: true, SpiritBox: true, Temperature: false, Ultraviolet: false, GhostWriting: false, DOTS: true },
+            { name: 'Yurei', Emf5: false, GhostOrb: true, SpiritBox: false, Temperature: true, Ultraviolet: false, GhostWriting: false, DOTS: true },
+            { name: 'Tua Mãe', Emf5: true, GhostOrb: true, SpiritBox: true, Temperature: false, Ultraviolet: false, GhostWriting: false, DOTS: false }
+        ];
+        
+        function savePDF(){
+            var element = document.getElementById('container');
+            html2pdf(element);
+        }
+
+        const filtersContainer = document.getElementById('filters');
+        const filteredGhostsList = document.getElementById('filtered-ghosts');
+
+        // Function to create a filter checkbox
+        function createFilterCheckbox(name, property) {
+            const propertyLabel = document.createElement('label');
+            propertyLabel.classList.add("property-label");
+            propertyLabel.textContent = name;
+
+            const propertyCheckbox = document.createElement('input');
+            propertyCheckbox.classList.add("property-checkbox");
+            propertyCheckbox.type = 'checkbox';
+            propertyCheckbox.id = property;
+            propertyCheckbox.addEventListener('change', filterGhosts);
+
+            propertyLabel.appendChild(propertyCheckbox);
+            filtersContainer.appendChild(propertyLabel);
+        }
+
+        // Function to filter ghosts based on selected characteristics
+        function filterGhosts() {
+            const selectedFilters = {};
+            for (const checkbox of filtersContainer.querySelectorAll('input[type="checkbox"]')) {
+                if (checkbox.checked) {
+                    selectedFilters[checkbox.id] = true;
+                }
+            }
+
+            const filteredList = ghosts.filter(ghost => {
+                let match = true;
+                for (const filter in selectedFilters) {
+                    match = match && ghost[filter] === selectedFilters[filter];
+                    if (!match) break; // Early exit if filter doesn't match
+                }
+                return match;
+            });
+
+            filteredGhostsList.innerHTML = ''; // Clear previous results
+            for (const ghost of filteredList) {
+                const ghostCard = document.createElement('div');
+                ghostCard.classList.add('ghost-card-container');
+
+                const ghostTitle = document.createElement('h3');
+                ghostTitle.textContent = ghost.name;
+                ghostTitle.classList.add('ghost-card-title');
+
+                const ghostEvidenceList = document.createElement('ul');
+                ghostEvidenceList.classList.add('ghost-card-evidence-list');
+                for (const evidence in ghost)
+                {
+                    if (ghost[evidence] && evidence !== "name") {
+                        let ghostEvidence = document.createElement('p');
+                        ghostEvidence.textContent = evidence;
+                        ghostEvidence.classList.add('ghost-card-evidence');
+
+                        ghostEvidenceList.appendChild(ghostEvidence);
+                    }
+                };
+
+                ghostCard.appendChild(ghostTitle);
+                ghostCard.appendChild(ghostEvidenceList);
+                filteredGhostsList.appendChild(ghostCard);
+            }
+        }
+
+        // Generate filter checkboxes dynamically based on ghost properties
+        for (const property in ghosts[0]) {
+            if (property !== 'name') { // Exclude 'name' property
+                createFilterCheckbox(property, property);
+            }
+        }
+
+        // Call filterGhosts initially to display all ghosts
+        filterGhosts();
+    </script>
+</body>
+</html>
